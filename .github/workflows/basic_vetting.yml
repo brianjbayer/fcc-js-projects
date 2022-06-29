@@ -1,0 +1,36 @@
+name: Basic Vetting
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: docker version
+        run: docker --version
+
+      - name: Build Dev Env
+        run: docker build --no-cache --target devenv -t app-devenv .
+
+      - name: Run Linting
+        run: docker run --rm -v $(pwd):/app app-devenv npm install && npx eslint .
+
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: docker version
+        run: docker --version
+
+      - name: Build Deploy Image
+        run: docker build --no-cache -t app-deploy .
+
+      - name: Run Tests
+        run: docker run --rm app-deploy
